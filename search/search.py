@@ -230,31 +230,38 @@ def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
     done = 0    
     expanded = [start[0]]
     #print("expanded : ", expanded)
+    store_path = []
     while done == 0:
         cur_ext = cur_level.pop()
         cur_state = cur_ext[0]
         #expanded.append(cur_state[0])
+        #check_goal = problem.isGoalState(cur_state[0])
+        #print("goal : {}, cur_state  : {}".format(check_goal,cur_state))
 
-        if problem.isGoalState(cur_state[0]): 
+        check_goal = problem.isGoalState(cur_state[0])
+        
+        if check_goal:   
             done = 1
-            print("done")
+            store_path = store_path + cur_ext
             continue
         succ = problem.getSuccessors(cur_state[0])
         for dir in range(len(succ)):
             nbor = succ[dir]
             try_exp = nbor[0]
             if try_exp in expanded:
+                #print("YES, expanded : \n",expanded)
                 continue
             else:
                 expanded.append(try_exp)
+                #print("NO\n")
             new_ext = cur_ext.copy()
             new_ext = [nbor] +new_ext
+            #print(new_ext)
             cur_level.push(new_ext)
         #print("not yet : ", cur_ext)
     #print(cur_ext)
     for node in cur_ext[:-1]:
         ret_path = [node[1]]+ret_path
-    #print("len : ", len(ret_path))
     return ret_path
     util.raiseNotDefined()
 
@@ -336,7 +343,7 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> List[Directi
     start = (init_node, "")
 
     first = (0,[start])
-
+    print("init : ",init_node)
     prio_dict[init_node] = 0
     prio_q.push(first,0) # the elements is (cost : prio_val, path) 
                         # elements in path is (node, action_to_node)
