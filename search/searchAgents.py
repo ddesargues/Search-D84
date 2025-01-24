@@ -389,27 +389,31 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
 
     "*** YOUR CODE HERE ***"
     cur_pos = state[0]
-    #print("cur_pos : ",cur_pos)
-    tot = 0
-    min_dist_goal = 0
     rem_goals = []
+
     for corner in corners:
-        #print("corner : ",corner)
         if corner in state[1]:continue
         rem_goals.append(corner)
+   
+    ts = 0
+
+
+    while len(rem_goals) > 0:
+        cur_min = 0
+        min_node = cur_pos
+        for rem in rem_goals:
+            abx = abs(rem[0]-cur_pos[0])
+            aby = abs(rem[1]-cur_pos[1])
+            store = abx + aby
+            if cur_min == 0 or store <= cur_min: 
+                cur_min = store
+                min_node = rem
+
+        rem_goals.remove(min_node)
+        cur_pos = min_node
+        ts += cur_min
     
-    for rem in rem_goals:
-        store = abs(rem[0]-cur_pos[0]) + abs(rem[1]-cur_pos[1])
-        #print("store : ",store)
-
- 
-        if tot == 0 or store <= tot:
-            tot = store
- 
-            
-    #print("tot : ",tot)
-    return tot # Default to trivial solution
-
+    return ts # Default to trivial solution
 
 
 class AStarCornersAgent(SearchAgent):
@@ -499,8 +503,76 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    food_copy = foodGrid.deepCopy()
+    tot = 0
+    height = food_copy.height
+    width = food_copy.width
+    cur_pos = position
+    
 
+
+    cur_mh = 0
+    min_x,min_y = -1,-1
+    for h in range(height):
+        for w in range(width):
+            if food_copy[w][h]:
+                abx = abs(w-cur_pos[0])
+                aby = abs(h-cur_pos[1])
+                store1 = abx+aby
+                if store1 <= cur_mh or cur_mh ==0  :
+                    cur_mh = store1
+                    min_x = w
+                    min_y = h
+    
+    food_positions = food_copy.asList()
+    
+    max_food_mh = 0
+
+    for h in range(height):
+        for w in range(width):
+            if food_copy[w][h]:
+                abx = abs(w-cur_pos[0])
+                aby = abs(w-cur_pos[1])
+                store1 = abx + aby
+                for h2 in range(height):
+                    for w2 in range(width):
+                        if food_copy[w2][h2]:
+                            acx = abs(w-w2)
+                            acy = abs(h-h2)
+                            store = acx+acy
+                            if store <= max_food_mh or max_food_mh == 0:
+                                max_food_mh = store
+
+    max_food_mh_dist = max(
+        abs(food1[0] - food2[0]) + abs(food1[1] - food2[1])
+        for i, food1 in enumerate(food_positions)
+        for food2 in food_positions[i+1:]
+    ) if len(food_positions) > 1 else 0
+    
+    tot =cur_mh+max_food_mh
+    return tot
+
+    ln = food_copy.count()
+    ind = 0
+    while food_copy.count() > 0 and ind < 20:
+        ind += 1
+        cur = 0
+        min_x,min_y = -1,-1
+        for h in range(height):
+            for w in range(width):
+                if food_copy[w][h]:
+                    abx = abs(w-cur_pos[0])
+                    aby = abs(h-cur_pos[1])
+                    store = abx + aby
+                    if cur == 0 or store <= cur:
+                        cur = store
+                        min_x,min_y = w,h
+        tot += cur
+        food_copy[min_x][min_y]= False
+        cur_pos = (min_x,min_y)
+    #if ln == 0: return tot
+
+    return tot-ln
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
