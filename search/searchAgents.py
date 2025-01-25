@@ -501,79 +501,52 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
     """
+
+
+
+
+
+
+
+
+
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
     food_copy = foodGrid.deepCopy()
-    tot = 0
+
     height = food_copy.height
     width = food_copy.width
-    cur_pos = position
-    
 
+    cur_pos = position
 
     cur_mh = 0
-    min_x,min_y = -1,-1
     for h in range(height):
         for w in range(width):
             if food_copy[w][h]:
                 abx = abs(w-cur_pos[0])
                 aby = abs(h-cur_pos[1])
                 store1 = abx+aby
-                if store1 <= cur_mh or cur_mh ==0  :
+                if cur_mh == 0 or store1 <= cur_mh:
                     cur_mh = store1
-                    min_x = w
-                    min_y = h
-    
-    food_positions = food_copy.asList()
-    
-    max_food_mh = 0
+    max_ds = 0
 
-    for h in range(height):
-        for w in range(width):
-            if food_copy[w][h]:
-                abx = abs(w-cur_pos[0])
-                aby = abs(w-cur_pos[1])
-                store1 = abx + aby
+    for h1 in range(height):
+        for w1 in range(width):
+            if food_copy[w1][h1]:
                 for h2 in range(height):
                     for w2 in range(width):
                         if food_copy[w2][h2]:
-                            acx = abs(w-w2)
-                            acy = abs(h-h2)
-                            store = acx+acy
-                            if store <= max_food_mh or max_food_mh == 0:
-                                max_food_mh = store
+                            acx = abs(w2-w1)
+                            acy = abs(h2-h1)
+                            store2 = acx + acy
 
-    max_food_mh_dist = max(
-        abs(food1[0] - food2[0]) + abs(food1[1] - food2[1])
-        for i, food1 in enumerate(food_positions)
-        for food2 in food_positions[i+1:]
-    ) if len(food_positions) > 1 else 0
-    
-    tot =cur_mh+max_food_mh
+                            if store2>= max_ds: max_ds = store2
+    tot = cur_mh+max_ds
     return tot
 
-    ln = food_copy.count()
-    ind = 0
-    while food_copy.count() > 0 and ind < 20:
-        ind += 1
-        cur = 0
-        min_x,min_y = -1,-1
-        for h in range(height):
-            for w in range(width):
-                if food_copy[w][h]:
-                    abx = abs(w-cur_pos[0])
-                    aby = abs(h-cur_pos[1])
-                    store = abx + aby
-                    if cur == 0 or store <= cur:
-                        cur = store
-                        min_x,min_y = w,h
-        tot += cur
-        food_copy[min_x][min_y]= False
-        cur_pos = (min_x,min_y)
-    #if ln == 0: return tot
 
-    return tot-ln
 
+    
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
     def registerInitialState(self, state):
